@@ -36,6 +36,18 @@ void axpy_cudakernel_cyclic(REAL* x, REAL* y, int n, REAL a) {
 	}
 }
 
+/* block_cyclic distribution of loop distribution */
+__global__
+void axpy_cudakernel_cyclic(REAL* x, REAL* y, int n, REAL a, int block_size) {
+	int thread_num = threadIdx.x + blockIdx.x * blockDim.x;
+	int total_threads = gridDim.x * blockDim.x;
+	
+	int i;
+	for (i=thread_num; i<n; i+=total_threads) { 
+		if (i < n) y[i] += a*x[i];
+	}
+}
+
 void axpy_cuda(REAL* x, REAL* y, int n, REAL a) {
   REAL *d_x, *d_y;
   cudaMalloc(&d_x, n*sizeof(REAL));
